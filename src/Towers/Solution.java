@@ -166,7 +166,7 @@ public class Solution {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 tiles[x+1][y+1].setActualValue(solution[x][y]);
-                tiles[x+1][y+1].setShownValue(solution[x][y]);
+                //tiles[x+1][y+1].setShownValue(solution[x][y]);
             }
         }
     }
@@ -180,6 +180,4 @@ public class Solution {
             }
         }
     }
-
-
 }

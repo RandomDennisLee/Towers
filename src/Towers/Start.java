@@ -12,8 +12,6 @@ import javafx.stage.Stage;
 public class Start extends Application {
     static GridPane field = new GridPane();
     static VBox mainLayout = new VBox();
-    static private int size = 5;
-    static Tile[][] tiles = new Tile[size+2][size+2];  // Convenience collection of all tiles
 
     public static void main(String[] args) {
         launch(args);
@@ -26,28 +24,23 @@ public class Start extends Application {
         Scene scene = new Scene(mainLayout);
         primaryStage.setScene(scene);
 
+        Puzzle.init();
+
         mainLayout.getChildren().add(field);
+        for (int i = 0; i < Puzzle.tiles.length; i++) {
+            for (int j = 0; j < Puzzle.tiles[i].length; j++) {
+                field.add(Puzzle.tiles[i][j], i, j);
 
-        for (int i = 0; i < size+2; i++) {
-            for (int j = 0; j < size+2; j++) {
-                Tile tile = new Tile(false, i, j, size);
-
-                if (i > 0 && i < size+1 && j > 0 && j < size+1) {
-                    tile = new Tile(true, i, j, size);
-                }
-                tiles[i][j] = tile;
-                field.add(tile, i, j);
-
-                tile.prefWidthProperty().bind(Bindings.min(scene.widthProperty().divide(size+2),
-                        scene.heightProperty().divide(size+2)));
-                tile.prefHeightProperty().bind(Bindings.min(scene.widthProperty().divide(size+2),
-                        scene.heightProperty().divide(size+2)));
+                Puzzle.tiles[i][j].prefWidthProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
+                        scene.heightProperty().divide(Puzzle.size + 2)));
+                Puzzle.tiles[i][j].prefHeightProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
+                        scene.heightProperty().divide(Puzzle.size + 2)));
             }
         }
 
         // set font for everything
         DoubleProperty fontSize = new SimpleDoubleProperty(10);
-        fontSize.bind(Bindings.min(scene.widthProperty().divide(size*3), scene.heightProperty().divide(size*3)));
+        fontSize.bind(Bindings.min(scene.widthProperty().divide(Puzzle.size*3), scene.heightProperty().divide(Puzzle.size*3)));
         field.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.asString(), ";" ,"-fx-alignment:center"));
 
         // weird bug with initial window size
@@ -57,7 +50,6 @@ public class Start extends Application {
         primaryStage.setMinWidth(400);
         primaryStage.show();
 
-        Solution.generate(tiles);
 
 
 

@@ -5,6 +5,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -17,12 +18,12 @@ public class Tile extends StackPane {
     boolean[] notes = new boolean[9];   // mini notes in each tile
     GridPane notesPane = new GridPane();// grid for displaying notes
     Label label = new Label();
-    double defaultOpacity = 0.2;
     double opacity = 0.2;
     boolean clickable = false;
     boolean enteringSolution = false;   // false - user is entering notes. True - user is entering answer
     int maxValue = 0;
-    int x, y;                           // coordinates of tile, should be for debugging purposes only
+    int x, y;                           // coordinates of tile
+    boolean isValid = true;
     //int isShowing = 0;                  // what the tile is showing. 0-nothing, 1-notes, 2-answer,3-given hint
 
     public Tile(boolean clickable1, int x1, int y1, int max) {
@@ -30,7 +31,8 @@ public class Tile extends StackPane {
             //initialise notes
             notes[i] = false;
         }
-
+        x = x1;
+        y = y1;
         clickable = clickable1;
         maxValue = max;
 
@@ -56,11 +58,11 @@ public class Tile extends StackPane {
             this.requestFocus();
             if (event.getButton() == MouseButton.PRIMARY) {
                 enteringSolution = true;
-                setOpacity(2);
+                setColor();
             }
             if (event.getButton() == MouseButton.SECONDARY) {
                 enteringSolution = false;
-                setOpacity(3);
+                setColor();
             }
         });
 
@@ -73,42 +75,63 @@ public class Tile extends StackPane {
 
             if (i > 0 && i <= maxValue) {
                 if (enteringSolution) {         // was it a left or right click?
-                    setShownValue(i);
+                    shownValue = i;
+                    setShownValue(shownValue);
                 } else {
-                    notes[i-1] = !notes[i-1];
+                    notes[i - 1] = !notes[i - 1];
                     showNotes();
                 }
+                Puzzle.validate();
+            }
+        });
+        this.setOnKeyPressed(event -> {
+            if ((event.getCode() == KeyCode.BACK_SPACE) || (event.getCode() == KeyCode.DELETE)) {
+                shownValue = 0;
+                clearNotes();
+                this.getChildren().clear();
+                Puzzle.validate();
             }
         });
 
         if (clickable) {
-            this.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                focusState(newValue);
-            });
-            setOpacity(1);
+            this.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+                    -> focusState(newValue));
+            setColor();
         }
     }
 
     private void focusState(boolean value) {
         if (!value) {
-            setOpacity(1);
+            setColor();
         }
     }
 
-    // mode 0 = nothing
     // 1 = normal puzzle
     // 2 = selected left click
     // 3 = selected right click
-    public void setOpacity(int mode) {
-        if (mode == 0) {
+    // 4 = Invalid value
+    public void setColor() {
+        if (!clickable) {
             this.setStyle("");
-        } else if (mode == 1) {
+            if (!isValid) {
+                this.setStyle("-fx-background-color: rgba(255, 0, 0, " + (opacity+.2) + ");");
+            }
+        } else if (!isValid) {
+            this.setStyle("-fx-background-color: rgba(255, 0, 0, " + (opacity+0.3) + "); -fx-border-color: black");
+        } else if (this.isFocused()) {
+            if (enteringSolution) {
+                this.setStyle("-fx-background-color: rgba(153, 204, 255, " + (opacity + 0.5) + "); -fx-border-color: black");
+            } else {
+                this.setStyle("-fx-background-color: rgba(128, 255, 128, " + (opacity + 0.5) + "); -fx-border-color: black");
+            }
+        } else {
             this.setStyle("-fx-background-color: rgba(0, 255, 191, " + opacity + "); -fx-border-color: black");
-        } else if (mode == 2) {
-            this.setStyle("-fx-background-color: rgba(153, 204, 255, " + (opacity+0.5) + "); -fx-border-color: black");
-        } else if (mode == 3) {
-            this.setStyle("-fx-background-color: rgba(128, 255, 128, " + (opacity+0.5) + "); -fx-border-color: black");
         }
+    }
+
+    public void setValid(boolean valid) {
+        isValid = valid;
+        setColor();
     }
 
     public void setActualValue(int v) {actualValue=v;}
@@ -117,16 +140,24 @@ public class Tile extends StackPane {
         label.setText(v+"");
         this.getChildren().clear();
         this.getChildren().add(label);
+        clearNotes();
+    }
 
+    public void clearNotes() {
         // delete notes
         for (int i = 0; i < notes.length; i++) {
             notes[i] = false;
         }
     }
 
+    public int getShownValue() {
+        return shownValue;
+    }
+
     public void showNotes() {
         this.getChildren().clear();
         this.getChildren().add(notesPane);
+        shownValue = 0;
         notesPane.getChildren().clear();
 
         for (int i = 0; i < notes.length; i++) {
