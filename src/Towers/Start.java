@@ -46,12 +46,8 @@ public class Start extends Application {
         // weird bug with initial window size
         primaryStage.show();
         primaryStage.hide();
-        primaryStage.setMinHeight(400);
-        primaryStage.setMinWidth(400);
+        primaryStage.setMinHeight(600);
+        primaryStage.setMinWidth(600);
         primaryStage.show();
-
-
-
-
     }
 }

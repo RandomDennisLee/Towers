@@ -1,13 +1,7 @@
 package Towers;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-
-import java.util.ArrayList;
-
 public class Puzzle {
-    static int size = 5;
+    static int size = 6;
     static Tile[][] tiles = new Tile[size+2][size+2];  // collection of all tiles, including border clues
 
     public static void init() {
@@ -22,6 +16,7 @@ public class Puzzle {
             }
         }
         Solution.generate(tiles);
+        Solver.solve(tiles);
     }
 
     public static void validate() {
@@ -29,7 +24,7 @@ public class Puzzle {
             for (int y1 = 1; y1 < size + 1; y1++) {
                 // Check for duplicates in same row, column
                 Tile target = tiles[x1][y1];
-                Boolean valid = true;
+                boolean valid = true;
                 for (int x = 1; x < size + 1; x++) {
                     if (x != target.x && tiles[x][target.y].getShownValue() == target.getShownValue() && target.getShownValue() > 0) {
                         tiles[x][target.y].setValid(false);
@@ -71,6 +66,7 @@ public class Puzzle {
             // counter < topClue and biggestValue = size, clue is violated
             // counter > topClue, border is violated
             // clueApplies true means the entire row/column is filled, so biggestValue should = size
+            //noinspection RedundantIfStatement
             if (counter > topClue || (counter < topClue && biggestValue == size) || (clueApplies && biggestValue < size ||
                     (counter == topClue && biggestValue < size))) {
                 tiles[x][0].setValid(false);
@@ -91,6 +87,7 @@ public class Puzzle {
                 }
             }
             // See explanation of logic above
+            //noinspection RedundantIfStatement
             if (counter > bottomClue || (counter < bottomClue && biggestValue == size) || (clueApplies && biggestValue < size ||
                     (counter == bottomClue && biggestValue < size))) {
                 tiles[x][size+1].setValid(false);
@@ -115,6 +112,7 @@ public class Puzzle {
                 }
             }
             // See explanation of logic above
+            //noinspection RedundantIfStatement
             if (counter > leftClue || (counter < leftClue && biggestValue == size) || (clueApplies && biggestValue < size ||
                     (counter == leftClue && biggestValue < size))) {
                 tiles[0][y].setValid(false);
@@ -135,6 +133,7 @@ public class Puzzle {
                 }
             }
             // See explanation of logic above
+            //noinspection RedundantIfStatement
             if (counter > rightClue || (counter < rightClue && biggestValue == size) || (clueApplies && biggestValue < size ||
                     (counter == rightClue && biggestValue < size))) {
                 tiles[size+1][y].setValid(false);

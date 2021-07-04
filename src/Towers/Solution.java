@@ -24,7 +24,6 @@ public class Solution {
     public static void initialise() {
         boolean successfulGeneration;
         do {
-            System.out.println("Attempting generation...");
             // initialise field. 1st column and row can be fixed - will scramble later
             // Creates reduced latin square for faster generation
             for (int x = 0; x < size; x++) {
@@ -70,16 +69,7 @@ public class Solution {
                     solution[j][swap2] = tempInt;
                 }
             }
-
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    System.out.print (solution[x][y]);
-                }
-                System.out.println();
-            }
-
         } while (!successfulGeneration);
-
         generateClues();
     }
 
@@ -136,26 +126,24 @@ public class Solution {
         }
     }
 
-    public static ArrayList checkPossibilities(int targetX, int targety) {
-        ArrayList possibilities = new ArrayList();
+    public static ArrayList<Integer> checkPossibilities(int targetX, int targetY) {
+        ArrayList<Integer> possibilities = new ArrayList<>();
         for (int i = 1; i <= size; i++) {
             possibilities.add(i);
         }
-        for (int x = 0; x < size; x++) {
-            if (possibilities.remove(Integer.valueOf(solution[x][targety]))) {
-            }
+        for (int x = 0; x < size && x != targetX; x++) {
+            possibilities.remove(Integer.valueOf(solution[x][targetY]));
         }
-        for (int y = 0; y < size; y++) {
-            if (possibilities.remove(Integer.valueOf(solution[targetX][y]))) {
-            }
+        for (int y = 0; y < size && y != targetY; y++) {
+            possibilities.remove(Integer.valueOf(solution[targetX][y]));
         }
         return possibilities;
     }
 
     public static boolean fillRandom(int targetX, int targety) {
-        ArrayList possibilities = checkPossibilities(targetX, targety);
+        ArrayList<Integer> possibilities = checkPossibilities(targetX, targety);
         if (possibilities.size() > 0) {
-            solution[targetX][targety] = (Integer) possibilities.get(r.nextInt(possibilities.size()));
+            solution[targetX][targety] = possibilities.get(r.nextInt(possibilities.size()));
         } else {
             return false;
         }

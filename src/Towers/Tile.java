@@ -12,6 +12,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Tile extends StackPane {
     int actualValue = 0;                // correct answer to puzzle. 1-9
     int shownValue = 0;                 // user-selected answer. 1-9, 0 is blank
@@ -24,13 +27,9 @@ public class Tile extends StackPane {
     int maxValue = 0;
     int x, y;                           // coordinates of tile
     boolean isValid = true;
-    //int isShowing = 0;                  // what the tile is showing. 0-nothing, 1-notes, 2-answer,3-given hint
 
     public Tile(boolean clickable1, int x1, int y1, int max) {
-        for (int i = 0; i < notes.length; i++) {
-            //initialise notes
-            notes[i] = false;
-        }
+        Arrays.fill(notes, false);  //initialise notes
         x = x1;
         y = y1;
         clickable = clickable1;
@@ -145,11 +144,10 @@ public class Tile extends StackPane {
 
     public void clearNotes() {
         // delete notes
-        for (int i = 0; i < notes.length; i++) {
-            notes[i] = false;
-        }
+        Arrays.fill(notes, false);
     }
 
+    // returns 0 if blank
     public int getShownValue() {
         return shownValue;
     }
@@ -169,4 +167,19 @@ public class Tile extends StackPane {
             }
         }
     }
+
+    public void setNotes(ArrayList<Integer> notes1) {
+        Arrays.fill(notes, false);
+        for (int i = 0; i < notes1.size(); i++) {
+            notes[notes1.get(i)-1] = true;
+        }
+        if (shownValue == 0) {
+            showNotes();
+        }
+    }
+
+/*    public void setNotes(boolean[] notes1) {
+        notes = notes1;
+        showNotes();
+    }*/
 }
