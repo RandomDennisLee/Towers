@@ -81,6 +81,7 @@ public class Tile extends StackPane {
                     showNotes();
                 }
                 Puzzle.validate();
+                Puzzle.backup();
             }
         });
         this.setOnKeyPressed(event -> {
@@ -89,6 +90,7 @@ public class Tile extends StackPane {
                 clearNotes();
                 this.getChildren().clear();
                 Puzzle.validate();
+                Puzzle.backup();
             }
         });
 
@@ -136,15 +138,18 @@ public class Tile extends StackPane {
     public void setActualValue(int v) {actualValue=v;}
     public void setShownValue(int v) {
         shownValue=v;
-        label.setText(v+"");
         this.getChildren().clear();
-        this.getChildren().add(label);
+        if (shownValue > 0) {
+            label.setText(v + "");
+            this.getChildren().add(label);
+        }
         clearNotes();
     }
 
     public void clearNotes() {
         // delete notes
         Arrays.fill(notes, false);
+        notesPane.getChildren().clear();
     }
 
     // returns 0 if blank
@@ -173,13 +178,13 @@ public class Tile extends StackPane {
         for (int i = 0; i < notes1.size(); i++) {
             notes[notes1.get(i)-1] = true;
         }
+        setNotes(notes);
+    }
+
+    public void setNotes(boolean[] notes1) {
+        notes = notes1;
         if (shownValue == 0) {
             showNotes();
         }
     }
-
-/*    public void setNotes(boolean[] notes1) {
-        notes = notes1;
-        showNotes();
-    }*/
 }

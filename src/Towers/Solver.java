@@ -85,7 +85,7 @@ public class Solver {
                             Tile temp = t;
                             while (temp.getShownValue() != biggestValue && !possibilities[temp.x][temp.y].contains(biggestValue)) {
                                 if (distanceToBiggest > 0) {
-                                    if (Collections.max(possibilities[temp.x][temp.y]) >= maxValue) {
+                                    if (possibilities[temp.x][temp.y].size() > 0 && Collections.max(possibilities[temp.x][temp.y]) >= maxValue) {
                                         possibilities[temp.x][temp.y].remove(Collections.max(possibilities[temp.x][temp.y]));
                                     }
                                 }
@@ -146,7 +146,6 @@ public class Solver {
                 }
                 for (int i = 1; i < occurrences.length && !changed; i++) {
                     if (occurrences[i] == 1) {
-                        System.out.println(x + ", " + index[i]);
                         tiles[x][index[i]].setShownValue(i);
                         changed = true;
                     }
@@ -170,7 +169,6 @@ public class Solver {
                 }
                 for (int i = 1; i < occurrences.length && !changed; i++) {
                     if (occurrences[i] == 1) {
-                        System.out.println(index[i] + ", " + y);
                         tiles[index[i]][y].setShownValue(i);
                         changed = true;
                     }

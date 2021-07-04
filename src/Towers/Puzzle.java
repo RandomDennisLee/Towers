@@ -1,11 +1,17 @@
 package Towers;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 public class Puzzle {
     static int size = 6;
     static Tile[][] tiles = new Tile[size+2][size+2];  // collection of all tiles, including border clues
+    static LinkedList history = new LinkedList();
+    static int historyPointer = -1;
+    static ArrayList<Object>[][] backupTiles;
 
     public static void init() {
-        for (int i = 0; i < size+2; i++) {
+        for (int i = 0; i < size + 2; i++) {
             for (int j = 0; j < size + 2; j++) {
                 Tile tile = new Tile(false, i, j, size);
 
@@ -15,16 +21,83 @@ public class Puzzle {
                 tiles[i][j] = tile;
             }
         }
+        newGame();
+    }
+
+    public static void backup() {
+        backupTiles = new ArrayList[size+2][size+2];
+        for (int i = 0; i < size + 2; i++) {
+            for (int j = 0; j < size + 2; j++) {
+                backupTiles[i][j] = new ArrayList<>();
+                backupTiles[i][j].add(tiles[i][j].getShownValue());
+                backupTiles[i][j].add(tiles[i][j].notes.clone());
+            }
+        }
+
+        while (history.size() > 0 && historyPointer < history.size()-1) {
+            history.removeLast();
+        }
+        historyPointer++;
+        history.add(backupTiles);
+    }
+
+    public static void undo() {
+        if (historyPointer > 0) {
+            System.out.println("mark");
+            clear();
+            historyPointer--;
+            backupTiles = (ArrayList[][]) history.get(historyPointer);
+            for (int i = 0; i < size + 2; i++) {
+                for (int j = 0; j < size + 2; j++) {
+                    tiles[i][j].setShownValue((Integer) backupTiles[i][j].get(0));
+                    tiles[i][j].setNotes(((boolean[]) backupTiles[i][j].get(1)).clone());
+                }
+            }
+            validate();
+        }
+    }
+
+    public static void redo() {
+        if (historyPointer < history.size()-1) {
+            clear();
+            historyPointer++;
+            backupTiles = (ArrayList[][]) history.get(historyPointer);
+            for (int i = 0; i < size + 2; i++) {
+                for (int j = 0; j < size + 2; j++) {
+                    tiles[i][j].setShownValue((Integer) backupTiles[i][j].get(0));
+                    tiles[i][j].setNotes(((boolean[]) backupTiles[i][j].get(1)).clone());
+                }
+            }
+            validate();
+        }
+    }
+
+    public static void clear() {
+        for (int i = 0; i < size + 2; i++) {
+            for (int j = 0; j < size + 2; j++) {
+                tiles[i][j].clearNotes();
+                tiles[i][j].setShownValue(0);
+            }
+        }
+    }
+
+    public static void newGame() {
+        clear();
         Solution.generate(tiles);
-        Solver.solve(tiles);
+        backup();
+        //Solver.solve(tiles);
     }
 
     public static void validate() {
+        boolean isGameComplete = true;
         for (int x1 = 1; x1 < size+1; x1++) {
             for (int y1 = 1; y1 < size + 1; y1++) {
-                // Check for duplicates in same row, column
                 Tile target = tiles[x1][y1];
+                if (target.getShownValue() == 0) {
+                    isGameComplete = false;
+                }
                 boolean valid = true;
+                // Check for duplicates in same row, column
                 for (int x = 1; x < size + 1; x++) {
                     if (x != target.x && tiles[x][target.y].getShownValue() == target.getShownValue() && target.getShownValue() > 0) {
                         tiles[x][target.y].setValid(false);
@@ -140,6 +213,9 @@ public class Puzzle {
             } else {
                 tiles[size+1][y].setValid(true);
             }
+        }
+        if (isGameComplete) {
+            Start.victory();
         }
     }
 }
