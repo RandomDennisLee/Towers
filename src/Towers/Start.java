@@ -9,11 +9,16 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static java.lang.Long.MAX_VALUE;
 
@@ -25,8 +30,11 @@ public class Start extends Application {
     static Button instructionsBtn = new Button("How to play");
     static Button undoBtn = new Button("Undo");
     static Button redoBtn = new Button("Redo");
+    static Button sizeBtn = new Button("Set Size");
     static Alert instructionBox;
     static Alert victoryBox;
+    static ArrayList<String> sizes = new ArrayList<>();
+    static Scene scene;
 
     public static void main(String[] args) {
         launch(args);
@@ -36,24 +44,31 @@ public class Start extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Towers");
 
-        Scene scene = new Scene(mainLayout);
+        scene = new Scene(mainLayout);
         primaryStage.setScene(scene);
-
-        Puzzle.init();
 
         menuLayout.getStylesheets().add(this.getClass().getResource("stylesheet.css").toExternalForm());
         mainLayout.getChildren().add(menuLayout);
 
         newGameBtn.setOnAction(e -> {Puzzle.newGame();});
-        newGameBtn.setMaxWidth(MAX_VALUE);
-        newGameBtn.setMinWidth(150);
 
         undoBtn.setOnAction(e -> {Puzzle.undo();});
         redoBtn.setOnAction(e -> {Puzzle.redo();});
-        undoBtn.setMaxWidth(MAX_VALUE);
-        redoBtn.setMaxWidth(MAX_VALUE);
+        sizes.addAll(Arrays.asList(new String[]{"3", "4", "5", "6", "7", "8", "9"}));
 
-        instructionsBtn.setMaxWidth(MAX_VALUE);
+        sizeBtn.setOnAction(e -> {
+            ChoiceDialog<String> dialog = new ChoiceDialog<String>(Puzzle.size+"", sizes);
+
+            dialog.setTitle("Set puzzle size");
+            dialog.setHeaderText("Set puzzle size");
+            dialog.setContentText("Choose your size:");
+
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(letter -> Puzzle.setSize(Integer.parseInt(result.get())));
+            refreshField();
+            Puzzle.newGame();
+        });
+
         instructionsBtn.setOnAction(e -> {
             instructionBox = new Alert(Alert.AlertType.INFORMATION);
             instructionBox.setTitle("Game Instructions");
@@ -72,23 +87,22 @@ public class Start extends Application {
             instructionBox.showAndWait();
         });
 
+        newGameBtn.setMinWidth(150);
+        newGameBtn.setMaxWidth(MAX_VALUE);
+        undoBtn.setMaxWidth(MAX_VALUE);
+        redoBtn.setMaxWidth(MAX_VALUE);
+        instructionsBtn.setMaxWidth(MAX_VALUE);
+        sizeBtn.setMaxWidth(MAX_VALUE);
         menuLayout.getChildren().add(newGameBtn);
         menuLayout.getChildren().add(instructionsBtn);
         menuLayout.getChildren().add(undoBtn);
         menuLayout.getChildren().add(redoBtn);
-
+        menuLayout.getChildren().add(sizeBtn);
 
         mainLayout.getChildren().add(field);
-        for (int i = 0; i < Puzzle.tiles.length; i++) {
-            for (int j = 0; j < Puzzle.tiles[i].length; j++) {
-                field.add(Puzzle.tiles[i][j], i, j);
 
-                Puzzle.tiles[i][j].prefWidthProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
-                        scene.heightProperty().divide(Puzzle.size + 2)));
-                Puzzle.tiles[i][j].prefHeightProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
-                        scene.heightProperty().divide(Puzzle.size + 2)));
-            }
-        }
+        Puzzle.init();
+        Puzzle.newGame();
 
         // set font for everything
         DoubleProperty fontSize = new SimpleDoubleProperty(10);
@@ -110,5 +124,19 @@ public class Start extends Application {
         victoryBox.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         victoryBox.setContentText("You Did It!");
         victoryBox.showAndWait();
+    }
+
+    public static void refreshField() {
+        field.getChildren().clear();
+        for (int i = 0; i < Puzzle.tiles.length; i++) {
+            for (int j = 0; j < Puzzle.tiles[i].length; j++) {
+                field.add(Puzzle.tiles[i][j], i, j);
+
+                Puzzle.tiles[i][j].prefWidthProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
+                        scene.heightProperty().divide(Puzzle.size + 2)));
+                Puzzle.tiles[i][j].prefHeightProperty().bind(Bindings.min(scene.widthProperty().divide(Puzzle.size + 2),
+                        scene.heightProperty().divide(Puzzle.size + 2)));
+            }
+        }
     }
 }

@@ -6,11 +6,13 @@ import java.util.LinkedList;
 public class Puzzle {
     static int size = 6;
     static Tile[][] tiles = new Tile[size+2][size+2];  // collection of all tiles, including border clues
-    static LinkedList history = new LinkedList();
+    static LinkedList<Object[][]> tileHistory = new LinkedList<>();
+    static LinkedList<Integer> sizeHistory = new LinkedList<>();
     static int historyPointer = -1;
     static ArrayList<Object>[][] backupTiles;
 
     public static void init() {
+        tiles = new Tile[size+2][size+2];
         for (int i = 0; i < size + 2; i++) {
             for (int j = 0; j < size + 2; j++) {
                 Tile tile = new Tile(false, i, j, size);
@@ -21,7 +23,7 @@ public class Puzzle {
                 tiles[i][j] = tile;
             }
         }
-        newGame();
+        Start.refreshField();
     }
 
     public static void backup() {
@@ -34,18 +36,28 @@ public class Puzzle {
             }
         }
 
-        while (history.size() > 0 && historyPointer < history.size()-1) {
-            history.removeLast();
+        while (tileHistory.size() > 0 && historyPointer < tileHistory.size()-1) {
+            tileHistory.removeLast();
+            sizeHistory.removeLast();
         }
         historyPointer++;
-        history.add(backupTiles);
+        tileHistory.add(backupTiles);
+        sizeHistory.add(size);
     }
 
     public static void undo() {
         if (historyPointer > 0) {
-            clear();
             historyPointer--;
-            backupTiles = (ArrayList[][]) history.get(historyPointer);
+            backupTiles = (ArrayList[][]) tileHistory.get(historyPointer);
+
+            System.out.println("History " + sizeHistory.get(historyPointer) + ", size = " + size);
+
+            if (sizeHistory.get(historyPointer) != size) {
+                size = sizeHistory.get(historyPointer);
+                init();
+            }
+            clear();
+
             for (int i = 0; i < size + 2; i++) {
                 for (int j = 0; j < size + 2; j++) {
                     tiles[i][j].setShownValue((Integer) backupTiles[i][j].get(0));
@@ -57,10 +69,16 @@ public class Puzzle {
     }
 
     public static void redo() {
-        if (historyPointer < history.size()-1) {
-            clear();
+        if (historyPointer < tileHistory.size()-1) {
             historyPointer++;
-            backupTiles = (ArrayList[][]) history.get(historyPointer);
+
+            if (sizeHistory.get(historyPointer) != size) {
+                size = sizeHistory.get(historyPointer);
+                init();
+            }
+            clear();
+
+            backupTiles = (ArrayList[][]) tileHistory.get(historyPointer);
             for (int i = 0; i < size + 2; i++) {
                 for (int j = 0; j < size + 2; j++) {
                     tiles[i][j].setShownValue((Integer) backupTiles[i][j].get(0));
@@ -69,6 +87,12 @@ public class Puzzle {
             }
             validate();
         }
+    }
+
+    public static void setSize(int size1) {
+        size = size1;
+        tiles = new Tile[size+2][size+2];
+        init();
     }
 
     public static void clear() {
