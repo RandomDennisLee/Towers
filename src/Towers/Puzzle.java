@@ -43,7 +43,6 @@ public class Puzzle {
 
     public static void undo() {
         if (historyPointer > 0) {
-            System.out.println("mark");
             clear();
             historyPointer--;
             backupTiles = (ArrayList[][]) history.get(historyPointer);
