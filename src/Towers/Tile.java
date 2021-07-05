@@ -173,18 +173,34 @@ public class Tile extends StackPane {
         }
     }
 
-    public void setNotes(ArrayList<Integer> notes1) {
-        Arrays.fill(notes, false);
+    // return true if notes changed
+    public boolean setNotes(ArrayList<Integer> notes1) {
+        boolean[] temp = new boolean[notes.length];
         for (int i = 0; i < notes1.size(); i++) {
-            notes[notes1.get(i)-1] = true;
+            System.out.println(notes1.get(i));
+            temp[notes1.get(i)-1] = true;
         }
-        setNotes(notes);
+        return setNotes(temp);
     }
 
-    public void setNotes(boolean[] notes1) {
+    public boolean setNotes(boolean[] notes1) {
+        boolean changed = !Arrays.equals(notes1, notes);
+        System.out.println("Notes changed: " + changed + " at " + x + ", " + y);
+        System.out.println("Old notes: " + Arrays.toString(notes));
+        System.out.println("New notes: " + Arrays.toString(notes1));
         notes = notes1;
         if (shownValue == 0) {
             showNotes();
         }
+        return changed;
+    }
+
+    public boolean hasNotes() {
+        for (int i = 0; i < notes.length; i++) {
+            if (notes[i] == true) {
+                return true;
+            }
+        }
+        return false;
     }
 }

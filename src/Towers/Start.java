@@ -31,6 +31,7 @@ public class Start extends Application {
     static Button undoBtn = new Button("Undo");
     static Button redoBtn = new Button("Redo");
     static Button sizeBtn = new Button("Set Size");
+    static Button hintBtn = new Button("Get a Hint!");
     static Alert instructionBox;
     static Alert victoryBox;
     static ArrayList<String> sizes = new ArrayList<>();
@@ -51,9 +52,11 @@ public class Start extends Application {
         mainLayout.getChildren().add(menuLayout);
 
         newGameBtn.setOnAction(e -> {Puzzle.newGame();});
-
         undoBtn.setOnAction(e -> {Puzzle.undo();});
         redoBtn.setOnAction(e -> {Puzzle.redo();});
+        hintBtn.setOnAction(e -> {Solver.solve(true);});
+
+
         sizes.addAll(Arrays.asList(new String[]{"3", "4", "5", "6", "7", "8", "9"}));
 
         sizeBtn.setOnAction(e -> {
@@ -93,11 +96,13 @@ public class Start extends Application {
         redoBtn.setMaxWidth(MAX_VALUE);
         instructionsBtn.setMaxWidth(MAX_VALUE);
         sizeBtn.setMaxWidth(MAX_VALUE);
+        hintBtn.setMaxWidth(MAX_VALUE);
         menuLayout.getChildren().add(newGameBtn);
         menuLayout.getChildren().add(instructionsBtn);
         menuLayout.getChildren().add(undoBtn);
         menuLayout.getChildren().add(redoBtn);
         menuLayout.getChildren().add(sizeBtn);
+        //menuLayout.getChildren().add(hintBtn);
 
         mainLayout.getChildren().add(field);
 
